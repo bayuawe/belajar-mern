@@ -3,8 +3,16 @@ import express from "express";
 const router = express.Router();
 
 //post /api/v1/auth/register
-router.post("/register", (req, res) => {
-  res.send("Register");
+router.post("/register", async(req, res) => {
+  try {
+    await User.create({
+        name: req.body.name,
+        email: req.body.email,
+        password: req.body.password,
+      })
+  } catch (error) {
+    res.json({message: error.message})               
+  }
 });
 
 //post /api/v1/auth/login
