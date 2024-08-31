@@ -1,5 +1,5 @@
 import express from "express";
-import { registerUser } from "../controllers/authController.js";
+import { registerUser, loginUser } from "../controllers/authController.js";
 
 
 const router = express.Router();
@@ -8,9 +8,7 @@ const router = express.Router();
 router.post("/register", registerUser);
 
 //post /api/v1/auth/login
-router.post("/login", (req, res) => {
-  res.send("Login");
-});
+router.post("/login", loginUser);
 
 //get /api/v1/auth/logout
 router.get("/logout", (req, res) => {
