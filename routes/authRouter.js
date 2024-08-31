@@ -1,19 +1,11 @@
 import express from "express";
+import { registerUser } from "../controllers/authController.js";
+
 
 const router = express.Router();
 
 //post /api/v1/auth/register
-router.post("/register", async(req, res) => {
-  try {
-    await User.create({
-        name: req.body.name,
-        email: req.body.email,
-        password: req.body.password,
-      })
-  } catch (error) {
-    res.json({message: error.message})               
-  }
-});
+router.post("/register", registerUser);
 
 //post /api/v1/auth/login
 router.post("/login", (req, res) => {
