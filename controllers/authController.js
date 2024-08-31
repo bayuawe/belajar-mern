@@ -76,3 +76,26 @@ export const loginUser = asyncHandler(async (req, res) => {
         });
     }
 });
+
+export const getCurrentUser = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user.id).select("-password");
+    if (user) {
+       return res.status(200).json({
+           user
+       })
+    } else {
+        res.status(404);
+        throw new Error("User not found");
+    }
+});
+
+export const logoutUser = asyncHandler(async (req, res) => {
+    res.cookie("jwt", "", {
+        expires: new Date(Date.now() + 10 * 1000),
+        httpOnly: true
+    });
+    res.status(200).json({
+        success: true,
+        message: "Logged out successfully"
+    });
+})
