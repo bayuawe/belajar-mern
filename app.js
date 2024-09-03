@@ -14,6 +14,7 @@ const port = 3000;
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
 import authRouter from "./routes/authRouter.js";
 import productRouter from "./routes/productRouter.js";
