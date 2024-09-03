@@ -5,8 +5,33 @@ export const CreateProduct = asyncHandler(async (req, res, next) => {
   const newProduct = await Product.create(req.body);
 });
 
-export const AllProduct = asyncHandler(async (req, res, next) => {
-  const dataProduct = await Product.find();
+export const AllProduct = asyncHandler(async (req, res) => {
+  //Req query
+  const queryObject = { ...req.query };
+
+  //Menghilangkan properti yang tidak diperlukan
+  const excludeFields = ["page", "limit"];
+  excludeFields.forEach((element) => delete queryObject[element]);
+
+  let query = Product.find(queryObject);
+
+  //Pagination
+  const page = req.query.page * 1 || 1;
+  const limitData = req.query.limit * 1 || 30;
+  const skipData = (page - 1) * limitData;
+
+  query = query.skip(skipData).limit(limitData);
+
+  if (req.query.page) {
+    const numProduct = await Product.countDocuments();
+    if (skipData >= numProduct) {
+      return res.status(404).json({
+        message: "page not found",
+      });
+    }
+  }
+
+  const dataProduct = await query;
 
   return res.status(201).json({
     message: "success get all product",
