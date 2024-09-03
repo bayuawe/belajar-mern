@@ -31,12 +31,26 @@ export const detailProduct = asyncHandler(async (req, res, next) => {
 });
 
 export const updateProduct = asyncHandler(async (req, res, next) => {
-  res.send("Update Product");
+  const paramId = req.params.id;
+  const updateProduct = await Product.findByIdAndUpdate(paramId, req.body, {
+    runValidators: false,
+    new: true,
+  });
+
+  return res.status(200).json({
+    message: "success update product",
+    data: updateProduct,
+  });
 });
 
 export const deleteProduct = asyncHandler(async (req, res, next) => {
-  res.send("Delete Product");
+  const paramId = req.params.id;
+  await Product.findByIdAndDelete(paramId);
+  return res.status(200).json({
+    message: "success delete product",
+  });
 });
+
 export const Fileupload = asyncHandler(async (req, res, next) => {
   res.send("File Upload Product");
 });
