@@ -3,6 +3,11 @@ import Product from "../Models/productModel.js";
 
 export const CreateProduct = asyncHandler(async (req, res, next) => {
   const newProduct = await Product.create(req.body);
+
+  return res.status(201).json({
+    message: "success create product",
+    data: newProduct,
+  });
 });
 
 export const AllProduct = asyncHandler(async (req, res) => {
