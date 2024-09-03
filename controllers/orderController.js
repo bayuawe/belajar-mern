@@ -56,24 +56,36 @@ export const CreateOrder = asyncHandler(async (req, res) => {
 
 //show all product order
 export const AllOrder = asyncHandler(async (req, res) => {
+const orders = await Order.find()
 
   return res.status(200).json({
+    orders,
     message: "success show product order",
   });
 });
 
 //show detail product order
 export const detailOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id)
+
+  if (!order) {
+    res.status(404);
+    throw new Error("Order tidak ditemukan");
+  }
 
   return res.status(200).json({
-    message: "success show detail product order",
+    data: order,
+    message: "Berhasil menampilkan detail pesanan produk",
   });
 });
 
 //show order by current user 
 export const currentUserOrder = asyncHandler(async (req, res) => {
 
+  const orders = await Order.find({ "user": req.user.id })
+
   return res.status(200).json({
+    orders,
     message: "success show current user product order",
   });
 });
