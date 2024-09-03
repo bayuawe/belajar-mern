@@ -10,10 +10,20 @@ export const AllProduct = asyncHandler(async (req, res) => {
   const queryObject = { ...req.query };
 
   //Menghilangkan properti yang tidak diperlukan
-  const excludeFields = ["page", "limit"];
+  const excludeFields = ["page", "limit", "name"];
   excludeFields.forEach((element) => delete queryObject[element]);
 
-  let query = Product.find(queryObject);
+  let query 
+  
+  if (req.query.name) {
+    query = Product.find({
+      name: {
+        $regex: req.query.name, $options: "i"
+      }
+    })
+  }else{
+    query = Product.find(queryObject);
+  }
 
   //Pagination
   const page = req.query.page * 1 || 1;
@@ -22,9 +32,10 @@ export const AllProduct = asyncHandler(async (req, res) => {
 
   query = query.skip(skipData).limit(limitData);
 
+  let countProduct = await Product.countDocuments();
+
   if (req.query.page) {
-    const numProduct = await Product.countDocuments();
-    if (skipData >= numProduct) {
+    if (skipData >= countProduct) {
       return res.status(404).json({
         message: "page not found",
       });
@@ -36,9 +47,12 @@ export const AllProduct = asyncHandler(async (req, res) => {
   return res.status(201).json({
     message: "success get all product",
     dataProduct,
+    count: countProduct
   });
 });
 
+
+//detail product
 export const detailProduct = asyncHandler(async (req, res, next) => {
   const paramsId = req.params.id;
   const productData = await Product.findById(paramsId);
