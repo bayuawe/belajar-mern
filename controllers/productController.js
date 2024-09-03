@@ -3,19 +3,31 @@ import Product from "../Models/productModel.js";
 
 export const CreateProduct = asyncHandler(async (req, res, next) => {
   const newProduct = await Product.create(req.body);
-
-  return res.status(201).json({
-    message: "Product created successfully",
-    data: newProduct,
-  });
 });
 
 export const AllProduct = asyncHandler(async (req, res, next) => {
-  res.send("All Product");
+  const dataProduct = await Product.find();
+
+  return res.status(201).json({
+    message: "success get all product",
+    dataProduct,
+  });
 });
 
 export const detailProduct = asyncHandler(async (req, res, next) => {
-  res.send("detail Product");
+  const paramsId = req.params.id;
+  const productData = await Product.findById(paramsId);
+
+  if (!productData) {
+    return res.status(404).json({
+      message: "Product not found",
+    });
+  }
+
+  return res.status(200).json({
+    message: "success get detail product",
+    data: productData,
+  });
 });
 
 export const updateProduct = asyncHandler(async (req, res, next) => {
