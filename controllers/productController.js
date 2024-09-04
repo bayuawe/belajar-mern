@@ -1,5 +1,7 @@
 import asyncHandler from "../middlewares/asyncHandler.js"; // Pastikan menambahkan .js jika menggunakan ES Modules
 import Product from "../Models/productModel.js";
+import { v2 as cloudinary } from "cloudinary";
+import streamifier from "streamifier";
 
 export const CreateProduct = asyncHandler(async (req, res, next) => {
   const newProduct = await Product.create(req.body);
@@ -18,15 +20,15 @@ export const AllProduct = asyncHandler(async (req, res) => {
   const excludeFields = ["page", "limit", "name"];
   excludeFields.forEach((element) => delete queryObject[element]);
 
-  let query 
-  
+  let query
+
   if (req.query.name) {
     query = Product.find({
       name: {
         $regex: req.query.name, $options: "i"
       }
     })
-  }else{
+  } else {
     query = Product.find(queryObject);
   }
 
@@ -96,18 +98,21 @@ export const deleteProduct = asyncHandler(async (req, res, next) => {
 });
 
 export const Fileupload = asyncHandler(async (req, res, next) => {
-  const file = req.file;
-  if (!file) {
-    return res.status(400).json({
-      message: "Please upload a file",
-    });
-  }
-  const imageFileName = file.filename;
-  const imageFilePath = `/uploads/${imageFileName}`;
-
-  return res.status(200).json({
-    success: true,
-    message: "File uploaded successfully",
-    imageFilePath,
+  const stream = cloudinary.uploader.upload_stream({
+    folder: "uploads",
+    allowed_formats: ["jpg", "png"],
+  }, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.status(500).json({
+          message: "Failed to upload image",
+          error: err.message
+        });
+    }
+    res.json({
+        message: "success upload image",
+        url: result.secure_url
+      });
   });
+  streamifier.createReadStream(req.file.buffer).pipe(stream);
 });
