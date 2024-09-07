@@ -13,33 +13,37 @@ export const CreateProduct = asyncHandler(async (req, res, next) => {
 });
 
 export const AllProduct = asyncHandler(async (req, res) => {
-  //Req query
   const queryObject = { ...req.query };
 
-  //Menghilangkan properti yang tidak diperlukan
+  // Menghilangkan properti yang tidak diperlukan
   const excludeFields = ["page", "limit", "name"];
   excludeFields.forEach((element) => delete queryObject[element]);
 
-  let query
+  let query = Product.find();
 
+  // Filter berdasarkan nama jika ada
   if (req.query.name) {
-    query = Product.find({
+    query = query.find({
       name: {
-        $regex: req.query.name, $options: "i"
-      }
-    })
-  } else {
-    query = Product.find(queryObject);
+        $regex: req.query.name,
+        $options: "i",
+      },
+    });
   }
 
-  //Pagination
+  // Filter berdasarkan kategori jika ada
+  if (req.query.category) {
+    query = query.find({ category: req.query.category });
+  }
+
+  // Pagination
   const page = req.query.page * 1 || 1;
   const limitData = req.query.limit * 1 || 30;
   const skipData = (page - 1) * limitData;
 
   query = query.skip(skipData).limit(limitData);
 
-  let countProduct = await Product.countDocuments();
+  const countProduct = await Product.countDocuments();
 
   if (req.query.page) {
     if (skipData >= countProduct) {
@@ -54,10 +58,9 @@ export const AllProduct = asyncHandler(async (req, res) => {
   return res.status(201).json({
     message: "success get all product",
     dataProduct,
-    count: countProduct
+    count: countProduct,
   });
 });
-
 
 //detail product
 export const detailProduct = asyncHandler(async (req, res, next) => {
@@ -98,21 +101,24 @@ export const deleteProduct = asyncHandler(async (req, res, next) => {
 });
 
 export const Fileupload = asyncHandler(async (req, res, next) => {
-  const stream = cloudinary.uploader.upload_stream({
-    folder: "uploads",
-    allowed_formats: ["jpg", "png"],
-  }, (err, result) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads",
+      allowed_formats: ["jpg", "png"],
+    },
+    (err, result) => {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({
           message: "Failed to upload image",
-          error: err.message
+          error: err.message,
         });
-    }
-    res.json({
+      }
+      res.json({
         message: "success upload image",
-        url: result.secure_url
+        url: result.secure_url,
       });
-  });
+    }
+  );
   streamifier.createReadStream(req.file.buffer).pipe(stream);
 });
