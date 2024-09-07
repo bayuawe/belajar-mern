@@ -38,12 +38,12 @@ export const AllProduct = asyncHandler(async (req, res) => {
 
   // Pagination
   const page = req.query.page * 1 || 1;
-  const limitData = req.query.limit * 1 || 30;
+  const limitData = req.query.limit * 1 || 10; // Batas produk per halaman diubah menjadi 10
   const skipData = (page - 1) * limitData;
 
   query = query.skip(skipData).limit(limitData);
 
-  const countProduct = await Product.countDocuments();
+  const countProduct = await Product.countDocuments(queryObject);
 
   if (req.query.page) {
     if (skipData >= countProduct) {
@@ -53,12 +53,17 @@ export const AllProduct = asyncHandler(async (req, res) => {
     }
   }
 
-  const dataProduct = await query;
+  const data = await query;
+  const totalPage = Math.ceil(countProduct / limitData);
 
   return res.status(201).json({
     message: "success get all product",
-    dataProduct,
-    count: countProduct,
+    data,
+    pagination: {
+      totalPage,
+      page,
+      totalProduct: countProduct,
+    },
   });
 });
 
